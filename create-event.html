@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Event | EventHub</title>
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Backend Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+
+</head>
+<body>
+    <div class="bg-gradient"></div>
+    <header>
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                </div>
+                <span style="background: linear-gradient(90deg, #d8b4fe, #a855f7, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px;">Campus Connect</span>
+            </a>
+            <div class="auth-buttons" style="display: flex; gap: 1rem; align-items: center;">
+                <a href="#" onclick="event.preventDefault(); document.getElementById('loginModal').style.display='flex';" class="btn-login" style="padding: 0.5rem; margin: 0;">Log in</a>
+                <a href="signup.html" class="btn-primary">Sign up</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="form-container" style="max-width: 600px; margin-top: 8rem; margin-bottom: 4rem;">
+            <h2 style="font-size: 2rem; margin-bottom: 2rem;">Create New Event</h2>
+            
+            <form id="createEventForm">
+                <div class="form-group">
+                    <label>Event Title</label>
+                    <input type="text" id="eventTitle" required placeholder="e.g. TechFest 2026">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="eventDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Time</label>
+                        <input type="time" id="eventTime" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select id="eventType" required>
+                            <option value="inter-college">Inter-College</option>
+                            <option value="intra-college">Intra-College</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="eventCategory" required>
+                            <option value="Technical">Technical</option>
+                            <option value="Cultural">Cultural</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Literary">Literary</option>
+                            <option value="Arts">Arts</option>
+                            <option value="Business">Business</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="eventLocation" required placeholder="e.g. Main Auditorium">
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea rows="4" required placeholder="Describe your event..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-primary form-btn">Secure Slot & Create Event</button>
+            </form>
+        </div>
+    </main>
+
+    <script src="js/data.js"></script>
+    <script>
+        document.getElementById('createEventForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const newEvent = {
+                id: String(Date.now()),
+                title: document.getElementById('eventTitle').value,
+                club: "Your Club", 
+                date: document.getElementById('eventDate').value,
+                time: document.getElementById('eventTime').value,
+                location: document.getElementById('eventLocation').value,
+                attendees: 0,
+                type: document.getElementById('eventType').value,
+                category: document.getElementById('eventCategory').value
+            };
+            
+            // Save to localStorage array
+            saveNewEvent(newEvent);
+            
+            alert('Slot booked! Event published to the Calendar successfully.');
+            // Redirect to calendar to see the updated slots
+            window.location.href = 'calendar.html';
+        });
+    </script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

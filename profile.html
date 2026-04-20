@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | Campus Connect</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+    <header>
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg></div>
+                <span style="background: linear-gradient(90deg, #d8b4fe, #a855f7, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; font-size: 1.6rem;">Campus Connect</span>
+            </a>
+            <div class="auth-buttons" style="display: flex; gap: 1rem; align-items: center;">
+                <a href="#" onclick="history.back()" class="btn-login" style="padding: 0.5rem; margin: 0;">← Back</a>
+                <a href="#" id="logoutBtn" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Sign Out</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" style="padding-top: 6rem; max-width: 600px;">
+        <div class="dash-welcome">
+            <h1>My Profile</h1>
+            <p style="color: var(--text-secondary);">Update your personal information</p>
+        </div>
+
+        <div class="form-container" style="margin: 0;">
+            <div id="profileError" style="color: #ff6b6b; background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3); padding: 0.75rem; border-radius: 8px; display: none; margin-bottom: 1rem;"></div>
+            <div id="profileSuccess" style="color: #51cf66; background: rgba(81,207,102,0.1); border: 1px solid rgba(81,207,102,0.3); padding: 0.75rem; border-radius: 8px; display: none; margin-bottom: 1rem;"></div>
+
+            <!-- Profile Avatar -->
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div id="avatarCircle" style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #a855f7, #7c3aed); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 2rem; font-weight: 800; color: white;"></div>
+                <div id="profileRole" class="event-tag" style="display: inline-block;"></div>
+            </div>
+
+            <form id="profileForm">
+                <div class="form-group">
+                    <label for="profileName">Full Name</label>
+                    <input type="text" id="profileName" required>
+                </div>
+                <div class="form-group">
+                    <label for="profileEmail">Email (read-only)</label>
+                    <input type="email" id="profileEmail" readonly style="opacity: 0.6; cursor: not-allowed;">
+                </div>
+                <div class="form-group">
+                    <label for="profilePhone">Phone</label>
+                    <input type="tel" id="profilePhone" placeholder="+91 98765 43210">
+                </div>
+                <button type="submit" class="btn-primary form-btn">Save Changes</button>
+            </form>
+
+            <div style="border-top: 1px solid var(--border); margin-top: 2rem; padding-top: 1.5rem;">
+                <h3 style="margin-bottom: 1rem; color: #ff6b6b;">Danger Zone</h3>
+                <button onclick="handleSignOut()" class="register-btn" style="background: rgba(255,107,107,0.2); color: #ff6b6b; width: 100%; padding: 0.75rem;">Sign Out of All Devices</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const client = initSupabase();
+        if (!client) return;
+        const authed = await requireAuth();
+        if (!authed) return;
+
+        const profile = await getUserProfile();
+        if (profile) {
+            document.getElementById('profileName').value = profile.full_name;
+            document.getElementById('profileEmail').value = profile.email;
+            document.getElementById('profilePhone').value = profile.phone || '';
+            document.getElementById('profileRole').textContent = profile.role.replace('_', ' ').toUpperCase();
+            document.getElementById('avatarCircle').textContent = profile.full_name.charAt(0).toUpperCase();
+        }
+
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.textContent = 'Saving...'; btn.disabled = true;
+            document.getElementById('profileError').style.display = 'none';
+            document.getElementById('profileSuccess').style.display = 'none';
+
+            const user = await getCurrentUser();
+            const { error } = await supabaseClient.from('profiles').update({
+                full_name: document.getElementById('profileName').value.trim(),
+                phone: document.getElementById('profilePhone').value.trim() || null
+            }).eq('id', user.id);
+
+            if (error) {
+                document.getElementById('profileError').textContent = error.message;
+                document.getElementById('profileError').style.display = 'block';
+            } else {
+                document.getElementById('profileSuccess').textContent = '✓ Profile updated successfully!';
+                document.getElementById('profileSuccess').style.display = 'block';
+            }
+            btn.textContent = 'Save Changes'; btn.disabled = false;
+        });
+    });
+
+    async function handleSignOut() {
+        await supabaseClient.auth.signOut();
+        window.location.href = 'index.html';
+    }
+    </script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

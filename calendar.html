@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yearly Event Calendar | EventHub</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .yearly-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .month-card {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            backdrop-filter: blur(8px);
+        }
+        .month-card h4 {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--accent-primary);
+            font-size: 1.25rem;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.25rem;
+            text-align: center;
+        }
+        .day-name {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+        }
+        .day {
+            font-size: 0.85rem;
+            padding: 0.5rem 0;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.03);
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+        .day.empty {
+            background: transparent;
+        }
+        .day.marked {
+            background: var(--accent-primary);
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
+        }
+        .day.marked:hover {
+            transform: scale(1.15);
+            background: var(--accent-hover);
+        }
+        /* Tooltip style for events */
+        .event-info {
+            background: var(--bg-color);
+            border: 1px solid var(--accent-primary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+        .event-info.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+
+    <!-- Backend Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+
+</head>
+<body>
+    <div class="bg-gradient"></div>
+    <header>
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+                </div>
+                <span style="background: linear-gradient(90deg, #d8b4fe, #a855f7, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px;">Campus Connect</span>
+            </a>
+            <div class="auth-buttons" style="display: flex; gap: 1rem; align-items: center;">
+                <a href="#" onclick="event.preventDefault(); document.getElementById('loginModal').style.display='flex';" class="btn-login" style="padding: 0.5rem; margin: 0;">Log in</a>
+                <a href="signup.html" class="btn-primary">Sign up</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" style="padding-top: 8rem; min-height: calc(100vh - 72px); padding-bottom: 4rem;">
+        <div style="margin-bottom: 1rem;">
+            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">2026 Yearly Event Calendar</h1>
+            <p style="color: var(--text-secondary);">Watch dates light up dynamically when newly created slots are booked by clubs. Click on marked days to see details.</p>
+        </div>
+
+        <div id="eventDetailBox" class="event-info">
+            <h3 id="edTitle" style="color: var(--accent-primary); font-size: 1.5rem; margin-bottom: 0.5rem;"></h3>
+            <p id="edClub" style="font-weight: 500; margin-bottom: 1rem;"></p>
+            <div style="display: flex; gap: 2rem; color: var(--text-secondary); font-size: 0.875rem;">
+                <span id="edLocation"></span>
+                <span id="edTime"></span>
+                <span id="edType"></span>
+            </div>
+        </div>
+
+        <div id="yearlyCalendar" class="yearly-grid">
+            <!-- Rendered by JS -->
+        </div>
+    </main>
+
+    <script src="js/data.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const year = 2026;
+            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const calendarContainer = document.getElementById('yearlyCalendar');
+            let html = '';
+            
+            // Map event dates for easy lookup
+            const eventMap = {};
+            events.forEach(ev => {
+                eventMap[ev.date] = ev; // Format is YYYY-MM-DD
+            });
+
+            months.forEach((month, index) => {
+                const daysInMonth = new Date(year, index + 1, 0).getDate();
+                const firstDay = new Date(year, index, 1).getDay(); // 0 is Sunday
+                
+                html += `<div class="month-card">
+                    <h4>${month}</h4>
+                    <div class="calendar-grid">
+                        <div class="day-name">Su</div><div class="day-name">Mo</div><div class="day-name">Tu</div><div class="day-name">We</div><div class="day-name">Th</div><div class="day-name">Fr</div><div class="day-name">Sa</div>`;
+                
+                // Empty days offset
+                for(let i = 0; i < firstDay; i++) {
+                    html += `<div class="day empty"></div>`;
+                }
+                
+                // Actual days
+                for(let d = 1; d <= daysInMonth; d++) {
+                    const mStr = String(index + 1).padStart(2, '0');
+                    const dStr = String(d).padStart(2, '0');
+                    const dateStr = `${year}-${mStr}-${dStr}`;
+                    
+                    const eventData = eventMap[dateStr];
+                    if(eventData) {
+                        const eventJson = JSON.stringify(eventData).replace(/"/g, '&quot;');
+                        html += `<div class="day marked" onclick="showEvent(${eventJson})" title="${eventData.title}">${d}</div>`;
+                    } else {
+                        html += `<div class="day">${d}</div>`;
+                    }
+                }
+                html += `</div></div>`;
+            });
+            calendarContainer.innerHTML = html;
+        });
+
+        function showEvent(ev) {
+            const box = document.getElementById('eventDetailBox');
+            document.getElementById('edTitle').textContent = ev.title + ' (' + ev.date + ')';
+            document.getElementById('edClub').textContent = "Hosted by: " + ev.club;
+            document.getElementById('edLocation').textContent = "📍 " + ev.location;
+            document.getElementById('edTime').textContent = "🕒 " + ev.time;
+            document.getElementById('edType').textContent = "🏷️ " + ev.category + " / " + ev.type;
+            
+            box.classList.remove('active');
+            void box.offsetWidth; // trigger reflow
+            box.classList.add('active');
+            
+            // Scroll to the detail box smoothly
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+    <script src="js/auth.js"></script>
+</body>
+</html>
