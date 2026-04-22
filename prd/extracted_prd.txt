@@ -1,0 +1,1013 @@
+EVENT MANAGEMENT SYSTEM
+Product Requirements Document (PRD)
+Version: 1.0
+Date: April 17, 2026
+Status: Draft
+Classification: Internal
+Prepared for: Event Management Team
+1. Executive Summary
+The Event Management System (EMS) is a multi-role, web-based platform designed to streamline the creation, management, and participation of events within an organization. The platform serves three distinct user layers — public visitors, event participants, and internal organizing teams — each with precise access controls and role-specific dashboards.
+The system draws its data model from a robust ER diagram encompassing entities such as Events, Customers, Organizers, Budget, Services (Photography, Venue, Catering, Music, Decoration), and Special Offers. It supports complex workflows from event discovery and participant registration to budget management, service allocation, and post-event feedback collection.
+2. Project Objectives
+Provide a publicly accessible event discovery interface requiring no login.
+Enable seamless participant onboarding via signup, login, and personalized dashboards.
+Deliver role-based access for event organizers, OC members, faculty advisors, and 4th-year student coordinators.
+Maintain a three-layer database architecture reflecting the complexity of event, budget, service, and user relationships.
+Fix the known signup-to-login redirection bug.
+Support post-event feedback loops between participants and organizers.
+Integrate service management (Photography, Venue, Catering, Music, Decoration) tied to events.
+Enable budget tracking with special offers, payment records, and financial summaries.
+3. Scope
+3.1 In Scope
+Public event listing (home page)
+Three-tier user authentication and role-based access control (RBAC)
+Participant registration, login, and event participation
+Event creation, editing, and management (POC / OC roles)
+Service management linked to events
+Budget creation, discount application, payment tracking, and special offer assignment
+Feedback module (ratings and comments from customers to organizers)
+Domain selection during OC member registration
+Admin/oversight panel for Organizers, Faculty Advisors, and 4th Year Students
+Database schema supporting all three layers
+Bug fix: signup redirect to login
+3.2 Out of Scope
+Mobile application (native iOS/Android)
+Third-party payment gateway integration (Razorpay, Stripe, etc.) — Phase 2
+Real-time chat or notification systems — Phase 2
+Advanced analytics or BI dashboards — Phase 2
+4. User Roles & Permissions
+The system operates across three access layers with six distinct roles:
+4.1 Layer 1 — Public User (Unauthenticated)
+Attribute
+Details
+Access Level
+Read-only, no login required
+Landing Page
+Home page with upcoming events for the current month
+Capabilities
+Browse events, view event details (name, date, type, venue)
+Restrictions
+Cannot register, participate, or view financial/internal data
+4.2 Layer 2 — Participant (Authenticated)
+Attribute
+Details
+Registration
+Signup page: C_name, C_email, C_phone, C_id (auto-generated)
+Authentication
+Login page with email + password
+Dashboard
+View all upcoming events, register/participate in chosen events
+Event Participation
+Select an event → confirm participation → receive confirmation
+Feedback
+Submit F_rating and F_comments post-event via 'Have Feedback From' relation
+Profile
+Update personal info (C_name, C_email, C_phone)
+Restrictions
+Cannot create/edit events or access budget/service management
+4.3 Layer 3a — Event POC (Point of Contact)
+A POC can be either an OC Domain Lead or an OC member assigned to a specific event. The POC role is event-scoped.
+Permission
+Access
+View Event Details
+Full event detail: F_name, F_type, F_start_date, F_end_date, No._of_guests
+Manage Services
+Link/unlink services (Photography, Venue, Catering, Music, Decoration) to their event
+View Budget
+View Total_amount, Estimated_cost, Discount, Amount_paid, Amount_due for assigned event
+Manage Participants
+View participant list for their event, approve/reject participation
+Coordinate OC
+Assign OC members to tasks within their domain
+Restrictions
+Cannot create new events, modify organizer hierarchy, or access other events
+4.4 Layer 3b — OC (Organizing Committee) Member
+OC members must select one or more domains during registration. Each domain carries specific responsibilities.
+Domain
+Responsibilities in System
+Logistics
+Venue coordination, guest count management, F_start_date/F_end_date planning
+Media Production
+Manage Photography service: Pname, Pphone
+Creative
+Decoration service management: Dname, Dphone
+PR & Management
+Public-facing event information, event descriptions
+Content & Documentation
+Event notes, documentation uploads, post-event reports
+Sponsorship
+Budget input: Estimated_cost, Discount, Special Offers
+Social Media
+Event promotion data, participant outreach
+Graphics
+Visual assets for event pages (photos, banners)
+Technical Team
+System/tech support for event infrastructure
+ℹ OC members can select multiple domains. Their permissions are the union of all selected domain permissions.
+4.5 Layer 3c — Organizer
+Permission
+Details
+Event Creation
+Create events: F_name, F_type, F_start_date, F_end_date, No._of_guests, F_id
+Event Editing
+Full edit rights on any event in the system
+Assign POC
+Designate Event POC for each event
+OC Management
+Onboard/remove OC members, assign/modify domain selections
+Budget Management
+Full access: Total_amount, Estimated_cost, Discount, P_id, P_type, Amount_paid, Amount_due
+Service Management
+Add/remove services: Photography, Venue, Catering, Music, Decoration
+Special Offers
+Create and manage Special Offers: SO_id, S_type, Valid_dates
+Feedback Review
+View all participant feedback: F_rating, F_comments
+Reports
+System-wide participant lists, event histories, budget summaries
+4.6 Layer 3d — Faculty Advisor
+Permission
+Details
+Oversight
+Read-only access to all events, budgets, participant lists
+Approval
+Approve or flag events before they go public
+Budget Audit
+Review budget reports; flag discrepancies
+Feedback Review
+Access all participant feedback
+Cannot Modify
+Cannot create, edit, or delete events or participants
+4.7 Layer 3e — 4th Year Student Coordinator
+Permission
+Details
+Event Management
+Create and manage events assigned to them by Organizer
+OC Coordination
+Coordinate OC teams under Organizer supervision
+Service Requests
+Submit service requirements (Venue, Catering, etc.) for approval
+Budget View
+View-only access to event budgets
+Participant Management
+View and manage participant registrations for their events
+Restrictions
+Cannot approve events or modify system-wide settings
+5. Functional Requirements
+5.1 Public Home Page
+Display all events where F_start_date falls in the current calendar month
+Each event card shows: F_name, F_type, F_start_date, F_end_date, Venue name (Vname), No._of_guests
+'Register' CTA button redirects unauthenticated users to the signup page
+Events are sorted by F_start_date ascending
+5.2 Authentication Module
+5.2.1 Signup Page
+Fields: Full Name (C_name), Email (C_email), Phone (C_phone), Password, Confirm Password
+Role selection: Participant (default) or Internal Role (requires invite code)
+C_id auto-generated (UUID) upon successful registration
+⚠ BUG FIX REQUIRED: On successful signup, the user must be redirected to the Login Page (/login), NOT to the home page or dashboard. Implement a server-side redirect with a success flash message: 'Account created successfully. Please log in.'
+5.2.2 Login Page
+Email + Password authentication
+JWT or session-based authentication
+Role-aware redirect post-login: Participant → Participant Dashboard | OC/POC/Organizer/FA/4YS → Role Dashboard
+'Forgot Password' flow (email-based OTP reset)
+5.3 Participant Dashboard
+Browse all available upcoming events (paginated)
+Filter events by: F_type, date range, Venue
+One-click event participation with confirmation modal
+My Events: list of events the participant has registered for
+Post-event: Submit feedback (F_rating: 1–5 stars, F_comments: text area)
+5.4 Event Management Module
+Create Event: F_name, F_type (dropdown), F_start_date, F_end_date, No._of_guests, assign Services
+Edit/Delete Event (Organizer and 4YS only)
+Link event to Services via 'Used In' relationship (from ER diagram)
+Event status workflow: Draft → Under Review → Approved → Published → Completed
+Faculty Advisor approval step between 'Under Review' and 'Approved'
+5.5 Service Management Module
+Based on ER diagram: Services entity has subtypes Photography, Venue, Catering, Music, Decoration.
+Service
+Attributes
+Managed By
+Photography
+Pname, Pphone
+Media Production OC / POC
+Venue
+Vname, Vphone
+Logistics OC / Organizer
+Catering
+Cname, Cphone
+Logistics OC / Organizer
+Music
+Mname, Mphone
+Creative OC / POC
+Decoration
+Dname, Dphone
+Creative OC / POC
+Each service has S_id (primary key)
+Multiple services can be linked to one event (N:M via 'Used In' relationship)
+5.6 Budget Management Module
+Budget is linked 1:1 to an Event via the 'has' relationship (ER diagram)
+Fields: Total_amount, Estimated_cost, Discount, P_id (payment ID), P_type (payment type), Amount_paid, Amount_due
+Budget is linked N:1 to Customer via 'Makes Payment For'
+Budget can have 1 Special Offer: SO_id, S_type, Valid_dates
+Amount_due auto-calculated: Amount_due = Total_amount − Amount_paid − Discount
+Payment history log with timestamps
+⚠ Budget editing is restricted to Organizers only. POCs and OC members have read-only access.
+5.7 OC Domain Selection (Registration Flow)
+During registration as an OC member, user must select at least one domain
+Available domains: Logistics, Media Production, Creative, PR & Management, Content & Documentation, Sponsorship, Social Media, Graphics, Technical Team
+Multi-select checkbox UI with descriptions for each domain
+Domain selections stored in junction table (OC_Member_Domains)
+Domains can be updated post-registration by Organizer
+5.8 Feedback Module
+Triggered post-event for all confirmed participants
+Feedback entity: F_rating (1–5), F_comments (text)
+Linked via 'Have Feedback From' relationship (Organizer ← N → Customer from ER)
+Organizer and Faculty Advisor can view aggregated feedback per event
+Feedback is anonymous to other participants but visible to Organizers/Faculty Advisors
+6. Database Schema — Three-Layer Design
+The database is organized into three logical layers mirroring the access layers of the application. All relationships are derived from the ER diagram.
+6.1 Layer 1 — Public Data Layer
+Table: Events
+Field
+Type
+Constraints
+Notes
+F_id
+VARCHAR(36)
+PRIMARY KEY
+UUID auto-generated
+F_name
+VARCHAR(255)
+NOT NULL
+Event name
+F_type
+ENUM
+NOT NULL
+e.g., Cultural, Technical, Sports
+F_start_date
+DATE
+NOT NULL
+Event start date
+F_end_date
+DATE
+NOT NULL
+Must be >= F_start_date
+No._of_guests
+INT
+NOT NULL, >= 0
+Expected guest count
+status
+ENUM
+DEFAULT 'Draft'
+Draft/UnderReview/Approved/Published/Completed
+organizer_id
+VARCHAR(36)
+FK → Organizers.O_id
+Event owner
+Table: Services
+Field
+Type
+Constraints
+Notes
+S_id
+VARCHAR(36)
+PRIMARY KEY
+UUID
+service_type
+ENUM
+NOT NULL
+Photography/Venue/Catering/Music/Decoration
+name
+VARCHAR(255)
+NOT NULL
+Pname / Vname / Cname / Mname / Dname
+phone
+VARCHAR(20)
+NOT NULL
+Pphone / Vphone / Cphone / Mphone / Dphone
+Table: Event_Services (Junction — Used In)
+Field
+Type
+Constraints
+Notes
+event_id
+VARCHAR(36)
+FK → Events.F_id
+Composite PK
+service_id
+VARCHAR(36)
+FK → Services.S_id
+Composite PK
+6.2 Layer 2 — User & Participation Layer
+Table: Customers (Participants)
+Field
+Type
+Constraints
+Notes
+C_id
+VARCHAR(36)
+PRIMARY KEY
+UUID auto-generated
+C_name
+VARCHAR(255)
+NOT NULL
+Full name
+C_email
+VARCHAR(255)
+UNIQUE, NOT NULL
+Login credential
+C_phone
+VARCHAR(20)
+NOT NULL
+Contact number
+password_hash
+VARCHAR(64)
+NOT NULL
+SHA-256 hex string
+created_at
+TIMESTAMP
+DEFAULT NOW()
+Registration timestamp
+Table: Event_Participants (Participation)
+Field
+Type
+Constraints
+Notes
+participant_id
+VARCHAR(36)
+FK → Customers.C_id
+Composite PK
+event_id
+VARCHAR(36)
+FK → Events.F_id
+Composite PK
+registered_at
+TIMESTAMP
+DEFAULT NOW()
+Registration time
+status
+ENUM
+DEFAULT 'Registered'
+Registered/Confirmed/Cancelled
+Table: Feedback
+Field
+Type
+Constraints
+Notes
+feedback_id
+VARCHAR(36)
+PRIMARY KEY
+UUID
+customer_id
+VARCHAR(36)
+FK → Customers.C_id
+Reviewer
+event_id
+VARCHAR(36)
+FK → Events.F_id
+Reviewed event
+organizer_id
+VARCHAR(36)
+FK → Organizers.O_id
+Target organizer
+F_rating
+TINYINT
+1–5, NOT NULL
+Star rating
+F_comments
+TEXT
+NULLABLE
+Written feedback
+submitted_at
+TIMESTAMP
+DEFAULT NOW()
+Submission time
+6.3 Layer 3 — Organizational & Financial Layer
+Table: Organizers
+Field
+Type
+Constraints
+Notes
+O_id
+VARCHAR(36)
+PRIMARY KEY
+UUID
+name
+VARCHAR(255)
+NOT NULL
+Full name
+email
+VARCHAR(255)
+UNIQUE, NOT NULL
+Login credential
+password_hash
+VARCHAR(64)
+NOT NULL
+SHA-256 hex string
+role
+ENUM
+NOT NULL
+Organizer/FacultyAdvisor/4YStudent/OC/POC
+created_at
+TIMESTAMP
+DEFAULT NOW()
+Table: OC_Members (extends Organizers)
+Field
+Type
+Constraints
+Notes
+oc_id
+VARCHAR(36)
+PRIMARY KEY, FK → Organizers.O_id
+invite_code
+VARCHAR(50)
+UNIQUE
+Used during registration
+Table: OC_Member_Domains (Multi-Domain Junction)
+Field
+Type
+Constraints
+Notes
+oc_id
+VARCHAR(36)
+FK → OC_Members.oc_id
+Composite PK
+domain
+ENUM
+NOT NULL
+Logistics/MediaProduction/Creative/PR/Content/Sponsorship/SocialMedia/Graphics/Technical
+Table: Budget
+Field
+Type
+Constraints
+Notes
+budget_id
+VARCHAR(36)
+PRIMARY KEY
+UUID
+event_id
+VARCHAR(36)
+UNIQUE, FK → Events.F_id
+1:1 with Event
+Total_amount
+DECIMAL(12,2)
+NOT NULL
+Gross event budget
+Estimated_cost
+DECIMAL(12,2)
+NOT NULL
+Projected expenditure
+Discount
+DECIMAL(12,2)
+DEFAULT 0
+Applied discount
+P_id
+VARCHAR(36)
+NOT NULL
+Payment record ID
+P_type
+ENUM
+NOT NULL
+Cash/Card/UPI/NEFT
+Amount_paid
+DECIMAL(12,2)
+DEFAULT 0
+Amount received
+Amount_due
+DECIMAL(12,2)
+COMPUTED
+Total − Paid − Discount
+customer_id
+VARCHAR(36)
+FK → Customers.C_id
+Payer reference
+Table: Special_Offers
+Field
+Type
+Constraints
+Notes
+SO_id
+VARCHAR(36)
+PRIMARY KEY
+UUID
+budget_id
+VARCHAR(36)
+FK → Budget.budget_id
+Linked budget
+S_type
+VARCHAR(100)
+NOT NULL
+Offer type description
+Valid_dates
+DATERANGE / VARCHAR
+NOT NULL
+Offer validity window
+7. Pages & Navigation Map
+Route
+Page
+Access Level
+Description
+/
+Home
+Public
+Upcoming events this month
+/signup
+Signup
+Public
+User registration
+/login
+Login
+Public
+Authentication
+/dashboard/participant
+Participant Dashboard
+Participant
+Browse & join events
+/events/:id
+Event Detail
+Public + Participant
+Full event info
+/dashboard/oc
+OC Dashboard
+OC Member
+Domain tasks, event coordination
+/dashboard/poc
+POC Dashboard
+POC
+Service & participant mgmt
+/dashboard/organizer
+Organizer Dashboard
+Organizer
+Full event & system mgmt
+/dashboard/faculty
+Faculty Advisor Dashboard
+Faculty Advisor
+Oversight & approvals
+/dashboard/4ys
+4YS Dashboard
+4th Year Student
+Event & OC coordination
+/events/create
+Create Event
+Organizer / 4YS
+New event form
+/events/:id/budget
+Budget Manager
+Organizer
+Financial management
+/events/:id/services
+Service Manager
+Organizer / POC
+Link services to event
+/admin/users
+User Management
+Organizer
+Manage all roles
+/profile
+Profile
+All Authenticated
+Edit personal info
+8. Known Bugs & Required Fixes
+8.1 Signup Page Redirect Bug [CRITICAL]
+⚠ SEVERITY: High | Status: Open | Sprint: 1
+Current Behavior:
+After a user successfully submits the signup form, the application redirects to the Home Page (/) instead of the Login Page (/login).
+Expected Behavior:
+On successful account creation, the server must return a 302 redirect to /login with a flash message: 'Account created successfully. Please log in.'
+Fix Instructions:
+Locate the doPost() method in SignupServlet.java.
+After successful DB insert via CustomerDAO.createCustomer(customer), replace the current response.sendRedirect('/') with response.sendRedirect(request.getContextPath() + '/login').
+Before the redirect, set a flash message in the session: request.getSession().setAttribute('flash_success', 'Account created successfully. Please log in.').
+In LoginServlet.java or login.js, read the flash attribute and render a styled success banner; remove it from session after display.
+Write a JUnit 5 integration test: simulate POST to /api/auth/signup, assert HTTP 302 Location header contains /login.
+9. Technology Stack
+The project uses a Java EE backend with Jakarta Servlet, JDBC for database access, and plain JavaScript on the frontend. All client-server communication is over HTTP using JSON as the data interchange format.
+9.1 Stack Overview
+Layer
+Technology
+Version / Notes
+Frontend
+HTML5 + CSS3 + Vanilla JavaScript (ES6+)
+No framework; fetch() API for all HTTP calls
+Data Format
+JSON (application/json)
+All API requests and responses use JSON body
+Backend Runtime
+Java 17+
+Jakarta EE 10 compatible
+Backend Framework
+Jakarta Servlet API
+javax.servlet.* → jakarta.servlet.*; deployed on Apache Tomcat 10+
+Database Connectivity
+JDBC (Java Database Connectivity)
+Direct SQL via PreparedStatement; no ORM
+Database
+MySQL 8.x
+Relational DB compatible with JDBC drivers
+JDBC Driver
+MySQL Connector/J 8.x
+mysql-connector-j-8.x.jar on classpath
+Build Tool
+Apache Maven 3.x
+pom.xml manages dependencies and WAR packaging
+App Server
+Apache Tomcat 10.x
+Deploys compiled .war file
+Authentication
+Jakarta HttpSession + SHA-256 password hashing
+Session-based auth; session stored server-side
+JSON Library
+Google Gson 2.x
+Serialize/deserialize Java objects to/from JSON
+Email
+Jakarta Mail (SMTP)
+OTP and notification emails
+Testing
+JUnit 5 + Mockito
+Unit tests for Servlet and JDBC layers
+Version Control
+Git + GitHub
+CI/CD via GitHub Actions → auto-deploy to Tomcat
+9.2 Architecture Overview
+The system follows a classic 3-tier architecture:
+Presentation Layer: HTML + CSS + JavaScript files served as static resources. The JS fetch() API sends HTTP requests with JSON bodies to the backend.
+Business Logic Layer: Jakarta Servlets receive HTTP requests, parse JSON using Gson, apply role-based logic, call the DAO layer, and write JSON responses using response.setContentType('application/json').
+Data Layer: JDBC DAOs (Data Access Objects) execute SQL via PreparedStatement against MySQL. Connection pooling is handled by Apache DBCP2 (configured in context.xml).
+ℹ No ORM (Hibernate/JPA) is used. All SQL is hand-written in DAO classes using JDBC PreparedStatement to prevent SQL injection.
+9.3 Project Structure
+Directory / File
+Purpose
+src/main/java/com/ems/servlet/
+All Jakarta Servlet classes (one per resource)
+src/main/java/com/ems/dao/
+JDBC DAO classes (EventDAO, CustomerDAO, BudgetDAO, etc.)
+src/main/java/com/ems/model/
+Plain Java model/POJO classes matching DB tables
+src/main/java/com/ems/util/DBUtil.java
+JDBC connection pool helper (Apache DBCP2)
+src/main/java/com/ems/util/JsonUtil.java
+Gson wrapper for serialize/deserialize
+src/main/java/com/ems/filter/AuthFilter.java
+Jakarta Filter for session-based RBAC
+src/main/webapp/
+Frontend: HTML, CSS, JS files
+src/main/webapp/WEB-INF/web.xml
+Servlet mappings, filter chains, welcome files
+src/main/resources/db/schema.sql
+Full DB schema DDL (CREATE TABLE statements)
+pom.xml
+Maven dependencies: Servlet API, Gson, MySQL Connector, JUnit
+9A. JSON API Design
+All endpoints accept Content-Type: application/json and return application/json. HTTP status codes are used semantically. The servlet reads the JSON body via request.getReader() and Gson, and writes the response via response.getWriter().
+9A.1 Standard Response Envelope
+Every API response follows this JSON wrapper structure:
+Field
+Type
+Description
+success
+boolean
+true if request succeeded, false if error
+message
+String
+Human-readable status message
+data
+Object | Array | null
+Response payload (null on errors)
+error
+String | null
+Error code or description (null on success)
+ℹ Example success: { "success": true, "message": "Event created.", "data": { "F_id": "abc-123" }, "error": null }
+ℹ Example error: { "success": false, "message": "Validation failed.", "data": null, "error": "INVALID_EMAIL" }
+9A.2 Authentication Endpoints
+Method
+URL
+Servlet Class
+Request JSON
+Response JSON
+POST
+/api/auth/signup
+SignupServlet
+{ C_name, C_email, C_phone, password, role, invite_code? }
+{ success, message, data: { C_id } }
+POST
+/api/auth/login
+LoginServlet
+{ email, password }
+{ success, message, data: { role, name, redirect_url } }
+POST
+/api/auth/logout
+LogoutServlet
+(no body)
+{ success, message }
+POST
+/api/auth/reset-password
+ResetPasswordServlet
+{ email }
+{ success, message }
+9A.3 Event Endpoints
+Method
+URL
+Servlet Class
+Request JSON
+Response JSON
+GET
+/api/events
+EventListServlet
+(query params: month, year)
+{ success, data: [ { F_id, F_name, F_type, F_start_date, F_end_date, No_of_guests, venue } ] }
+GET
+/api/events/{F_id}
+EventDetailServlet
+(no body)
+{ success, data: { event, services, budget_summary } }
+POST
+/api/events
+CreateEventServlet
+{ F_name, F_type, F_start_date, F_end_date, No_of_guests }
+{ success, data: { F_id } }
+PUT
+/api/events/{F_id}
+UpdateEventServlet
+{ F_name?, F_type?, F_start_date?, F_end_date?, No_of_guests? }
+{ success, message }
+DELETE
+/api/events/{F_id}
+DeleteEventServlet
+(no body)
+{ success, message }
+PUT
+/api/events/{F_id}/status
+EventStatusServlet
+{ status }
+{ success, message }
+9A.4 Participant Endpoints
+Method
+URL
+Servlet Class
+Request JSON
+Response JSON
+POST
+/api/events/{F_id}/participate
+ParticipateServlet
+(session provides C_id)
+{ success, message, data: { registration_id } }
+GET
+/api/participants/my-events
+MyEventsServlet
+(session provides C_id)
+{ success, data: [ { F_id, F_name, status } ] }
+DELETE
+/api/events/{F_id}/participate
+CancelParticipationServlet
+(session provides C_id)
+{ success, message }
+9A.5 Budget Endpoints
+Method
+URL
+Servlet Class
+Request JSON
+Response JSON
+GET
+/api/events/{F_id}/budget
+GetBudgetServlet
+(no body)
+{ success, data: { Total_amount, Estimated_cost, Discount, Amount_paid, Amount_due, P_type } }
+POST
+/api/events/{F_id}/budget
+CreateBudgetServlet
+{ Total_amount, Estimated_cost, Discount, P_type }
+{ success, data: { budget_id } }
+PUT
+/api/events/{F_id}/budget
+UpdateBudgetServlet
+{ Amount_paid?, Discount?, P_type? }
+{ success, message }
+POST
+/api/events/{F_id}/budget/offers
+SpecialOfferServlet
+{ S_type, Valid_dates }
+{ success, data: { SO_id } }
+9A.6 Service Endpoints
+Method
+URL
+Servlet Class
+Request JSON
+Response JSON
+GET
+/api/services
+ServiceListServlet
+(query param: type)
+{ success, data: [ { S_id, service_type, name, phone } ] }
+POST
+/api/services
+CreateServiceServlet
+{ service_type, name, phone }
+{ success, data: { S_id } }
+POST
+/api/events/{F_id}/services
+LinkServiceServlet
+{ S_id }
+{ success, message }
+DELETE
+/api/events/{F_id}/services/{S_id}
+UnlinkServiceServlet
+(no body)
+{ success, message }
+9A.7 Feedback Endpoints
+Method
+URL
+Servlet Class
+Request JSON
+Response JSON
+POST
+/api/events/{F_id}/feedback
+SubmitFeedbackServlet
+{ F_rating, F_comments }
+{ success, message }
+GET
+/api/events/{F_id}/feedback
+GetFeedbackServlet
+(no body)
+{ success, data: [ { F_rating, F_comments, submitted_at } ] }
+9A.8 JDBC DAO Pattern
+Each Servlet delegates DB operations to a DAO class. The pattern is:
+Servlet reads JSON from request.getReader() using Gson.fromJson().
+Servlet validates input fields; returns 400 with error JSON if invalid.
+Servlet calls the appropriate DAO method (e.g., EventDAO.createEvent(event)).
+DAO gets a Connection from DBUtil.getConnection() (Apache DBCP2 pool).
+DAO executes a PreparedStatement with bound parameters.
+DAO returns a model object or boolean to the Servlet.
+Servlet serializes the result to JSON using Gson.toJson() and writes to response.getWriter().
+Connection is closed in a finally block to return it to the pool.
+⚠ All SQL uses PreparedStatement with ? placeholders. String concatenation in SQL is strictly forbidden to prevent SQL injection.
+9A.9 Session-Based Authentication Flow (Jakarta HttpSession)
+User submits login JSON to POST /api/auth/login.
+LoginServlet queries DB via CustomerDAO / OrganizerDAO using JDBC.
+Password is hashed with SHA-256 and compared to stored hash.
+On match, servlet calls request.getSession(true) to create a session.
+Session attributes stored: session.setAttribute('userId', id), session.setAttribute('role', role).
+All protected endpoints read session.getAttribute('role') for RBAC.
+AuthFilter.java intercepts all /api/* requests; redirects to /login if session is null.
+Logout calls session.invalidate().
+ℹ Session timeout is configured in web.xml: <session-config><session-timeout>30</session-timeout></session-config> (30 minutes).
+9A.10 Frontend JavaScript Fetch Pattern
+All frontend API calls use the native fetch() API with JSON. A shared api.js utility handles the base URL, headers, and error parsing:
+Operation
+JS fetch() Pattern
+POST (Create/Login)
+fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email, password }), credentials:'include' })
+GET (List)
+fetch('/api/events?month=4&year=2026', { credentials:'include' }).then(r => r.json())
+PUT (Update)
+fetch('/api/events/'+id, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(updates), credentials:'include' })
+DELETE
+fetch('/api/events/'+id, { method:'DELETE', credentials:'include' })
+Error Handling
+Check response.ok; if false, parse response.json() to get { success:false, error:'...' } and display to user
+ℹ credentials:'include' is required on all fetch() calls so the browser sends the JSESSIONID cookie with each request to maintain the Jakarta HttpSession.
+10. Non-Functional Requirements
+10.1 Performance
+Home page must load in under 2 seconds on a 4G connection.
+All dashboard API responses must complete within 500ms for p95 requests.
+Database queries must use indexes on F_start_date, C_email, O_id.
+10.2 Security
+All passwords must be hashed with SHA-256 before storing. Never store plaintext passwords.
+All SQL must use PreparedStatement with bound parameters — no string concatenation in SQL queries.
+Jakarta HttpSession is used for auth state. Sessions must be invalidated on logout via session.invalidate().
+AuthFilter.java must intercept all /api/* routes and verify session attributes before passing the request to any Servlet.
+JSON inputs must be validated in the Servlet layer before reaching the DAO layer; reject unexpected fields.
+Response headers must include: X-Content-Type-Options: nosniff, X-Frame-Options: DENY to prevent XSS and clickjacking.
+HTTPS enforced in production via Tomcat SSL connector; HTTP Strict Transport Security (HSTS) headers set.
+CORS headers restricted to the frontend origin only, configured in a CORS Filter registered in web.xml.
+10.3 Scalability
+Database schema must support pagination for Events and Participant tables.
+Stateless backend architecture to support horizontal scaling.
+10.4 Accessibility
+WCAG 2.1 AA compliance for all public-facing pages.
+All form fields must have accessible labels and ARIA attributes.
+11. ER Diagram to Schema Mapping
+The following table maps every entity and relationship from the provided ER diagram to the corresponding database table and section of this PRD:
+ER Entity / Relationship
+DB Table(s)
+PRD Section
+Services (S_id)
+Services
+6.1
+Photography (Pname, Pphone)
+Services (service_type='Photography')
+6.1
+Venue (Vname, Vphone)
+Services (service_type='Venue')
+6.1
+Catering (Cname, Cphone)
+Services (service_type='Catering')
+6.1
+Music (Mname, Mphone)
+Services (service_type='Music')
+6.1
+Decoration (Dname, Dphone)
+Services (service_type='Decoration')
+6.1
+Used In (Services ↔ Event)
+Event_Services
+6.1
+Event (F_id, F_name, F_type...)
+Events
+6.1
+Organizers (O_id)
+Organizers
+6.3
+Organize (Organizer → Event, 1:N)
+Events.organizer_id FK
+6.1, 6.3
+Customer (C_id, C_name, C_email, C_phone)
+Customers
+6.2
+Event 'has' Customer (N:N)
+Event_Participants
+6.2
+Have Feedback From (Organizer ← Customer)
+Feedback
+6.2
+Budget (Total_amount, Estimated_cost...)
+Budget
+6.3
+Makes Payment For (Customer → Budget)
+Budget.customer_id FK
+6.3
+Budget 'has' Special Offers
+Special_Offers
+6.3
+Special Offers (SO_id, S_type, Valid_dates)
+Special_Offers
+6.3
+12. Development Milestones & Sprint Plan
+Sprint
+Duration
+Deliverables
+Sprint 1
+Week 1–2
+Maven project setup, DBUtil.java (JDBC pool), schema.sql, AuthFilter.java, SignupServlet + LoginServlet with JSON request/response, Bug Fix #8.1
+Sprint 2
+Week 3–4
+EventListServlet (public), EventDetailServlet, ParticipateServlet, MyEventsServlet, Frontend JS fetch() for Home Page and Participant Dashboard
+Sprint 3
+Week 5–6
+OC registration with domain selection, ServiceListServlet, LinkServiceServlet, POC Dashboard JS, JSON API for services
+Sprint 4
+Week 7–8
+CreateEventServlet, UpdateEventServlet, EventStatusServlet (Faculty Approval flow), BudgetServlet suite, SpecialOfferServlet, Organizer Dashboard JS
+Sprint 5
+Week 9–10
+Faculty Advisor Dashboard JS, 4YS Dashboard, FeedbackServlet (submit + view), GetBudgetServlet with read-only JSON response for POC/OC
+Sprint 6
+Week 11–12
+JUnit 5 tests for all DAO + Servlet classes, JDBC query optimization (indexes), Tomcat deployment, end-to-end testing, bug fixes
+13. Appendix — Glossary
+Term
+Definition
+EMS
+Event Management System — this platform
+OC
+Organizing Committee — internal student team managing events
+POC
+Point of Contact — OC member responsible for a specific event
+4YS
+4th Year Student Coordinator — senior student with elevated event management access
+FA
+Faculty Advisor — faculty member with approval and oversight rights
+F_id
+Event ID — primary key for the Events table
+C_id
+Customer ID — primary key for the Customers (Participants) table
+O_id
+Organizer ID — primary key for the Organizers table
+S_id
+Service ID — primary key for the Services table
+SO_id
+Special Offer ID — primary key for the Special_Offers table
+RBAC
+Role-Based Access Control — permission model used throughout this system
+Jakarta Servlet
+Java EE standard API for handling HTTP requests/responses server-side; deployed on Tomcat 10+
+JDBC
+Java Database Connectivity — Java API for executing SQL against relational databases
+DAO
+Data Access Object — Java class encapsulating all JDBC SQL for a given entity
+PreparedStatement
+JDBC interface for parameterized SQL queries; prevents SQL injection
+DBUtil
+Utility class wrapping Apache DBCP2 connection pool; provides getConnection()
+Gson
+Google JSON library used to serialize Java objects to JSON and parse JSON request bodies
+HttpSession
+Jakarta Servlet session object; stores user auth state server-side keyed by JSESSIONID cookie
+AuthFilter
+Jakarta Filter class intercepting all /api/* requests to enforce session-based RBAC
+fetch()
+Native browser JavaScript API used to send HTTP requests with JSON bodies to Servlets
+WAR
+Web Application Archive — packaged deployable unit produced by Maven for Tomcat
+UUID
+Universally Unique Identifier — auto-generated string primary keys
+— End of Document —

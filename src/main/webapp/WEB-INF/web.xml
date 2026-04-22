@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0">
+
+    <display-name>Event Management System</display-name>
+
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+
+    <!-- Signup -->
+    <servlet>
+        <servlet-name>SignupServlet</servlet-name>
+        <servlet-class>com.ems.servlet.SignupServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SignupServlet</servlet-name>
+        <url-pattern>/api/auth/signup</url-pattern>
+    </servlet-mapping>
+
+    <!-- Login -->
+    <servlet>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>com.ems.servlet.LoginServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/api/auth/login</url-pattern>
+    </servlet-mapping>
+
+    <!-- Logout -->
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>com.ems.servlet.LogoutServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/api/auth/logout</url-pattern>
+    </servlet-mapping>
+
+    <!-- Events CRUD (supports /api/events and /api/events/{id}) -->
+    <servlet>
+        <servlet-name>EventListServlet</servlet-name>
+        <servlet-class>com.ems.servlet.EventListServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>EventListServlet</servlet-name>
+        <url-pattern>/api/events/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- Event Participation -->
+    <servlet>
+        <servlet-name>EventParticipationServlet</servlet-name>
+        <servlet-class>com.ems.servlet.EventParticipationServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>EventParticipationServlet</servlet-name>
+        <url-pattern>/api/participate/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- My Registrations -->
+    <servlet>
+        <servlet-name>MyRegistrationsServlet</servlet-name>
+        <servlet-class>com.ems.servlet.EventParticipationServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>MyRegistrationsServlet</servlet-name>
+        <url-pattern>/api/participants/my-events</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>ServiceServlet</servlet-name>
+        <servlet-class>com.ems.servlet.ServiceServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ServiceServlet</servlet-name>
+        <url-pattern>/api/services/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>UserListServlet</servlet-name>
+        <servlet-class>com.ems.servlet.UserListServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UserListServlet</servlet-name>
+        <url-pattern>/api/users/*</url-pattern>
+    </servlet-mapping>
+</web-app>
