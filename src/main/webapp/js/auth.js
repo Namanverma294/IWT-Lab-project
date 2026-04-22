@@ -35,6 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     btn.textContent = '✓ Success! Redirecting...';
                     const role = json.data?.role || 'participant';
+                    localStorage.setItem('userName', json.data?.name || 'User');
+                    localStorage.setItem('userRole', role);
                     setTimeout(() => redirectToDashboard(role), 500);
                 }
             } catch (err) {
@@ -117,9 +119,35 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const authButtons = document.querySelector('.auth-buttons');
-    if (authButtons) {
+    const userName = localStorage.getItem('userName');
+    const userRole = localStorage.getItem('userRole') || 'participant';
 
+    if (userName) {
+        const welcomeTitle = document.getElementById('welcomeTitle');
+        if (welcomeTitle) {
+            welcomeTitle.textContent = `Welcome back, ${userName}!`;
+        }
+
+        const profileBtn = document.querySelector('a[href="profile.html"]');
+        if (profileBtn) {
+            profileBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px; vertical-align: text-bottom;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> ${userName}`;
+        }
+
+        if (authButtons && authButtons.innerHTML.includes('Log in')) {
+            authButtons.innerHTML = `
+                <a href="#" onclick="redirectToDashboard('${userRole}')" class="btn-login" style="padding: 0.5rem; margin: 0;">Dashboard</a>
+                <a href="api/auth/logout" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Sign Out</a>
+            `;
+        }
     }
+
+    document.body.addEventListener('click', (e) => {
+        const logoutLink = e.target.closest('a[href="api/auth/logout"]');
+        if (logoutLink) {
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userRole');
+        }
+    });
 
 });
 

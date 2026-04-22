@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 public class EventListServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
     private EventDAO eventDAO;
     private Gson gson;
 
@@ -94,6 +95,7 @@ public class EventListServlet extends HttpServlet {
         }
 
         String userId = (String) session.getAttribute("user_id");
+        @SuppressWarnings("unchecked")
         Map<String, String> body = gson.fromJson(request.getReader(), Map.class);
 
         String name = body.get("name");
@@ -136,6 +138,7 @@ public class EventListServlet extends HttpServlet {
         }
 
         String eventId = pathInfo.substring(1);
+        @SuppressWarnings("unchecked")
         Map<String, String> body = gson.fromJson(request.getReader(), Map.class);
 
         String name = body.get("name");

@@ -18,6 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 public class ServiceServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
     private Gson gson;
 
     @Override
@@ -80,6 +81,7 @@ public class ServiceServlet extends HttpServlet {
         Map<String, Object> jsonResponse = new HashMap<>();
         
         try {
+            @SuppressWarnings("unchecked")
             Map<String, String> payload = gson.fromJson(request.getReader(), Map.class);
             String serviceType = payload.get("service_type");
             String name = payload.get("name");

@@ -18,6 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 public class LoginServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
     private CustomerDAO customerDAO;
     private Gson gson;
 
@@ -35,6 +36,7 @@ public class LoginServlet extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
         
+        @SuppressWarnings("unchecked")
         Map<String, String> creds = gson.fromJson(request.getReader(), Map.class);
         String email = creds != null ? creds.get("email") : null;
         String password = creds != null ? creds.get("password") : null;

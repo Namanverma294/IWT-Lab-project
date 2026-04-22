@@ -33,7 +33,7 @@
             <p id="cDesc" style="color: var(--text-secondary); max-width: 700px; margin: 0 auto; line-height: 1.8;"></p>
             
             <div style="margin-top: 2.5rem;">
-                <button class="btn-primary" style="font-size: 1.1rem; padding: 0.75rem 2rem;">Apply for Membership</button>
+                <button id="applyBtn" class="btn-primary" style="font-size: 1.1rem; padding: 0.75rem 2rem;" onclick="this.textContent='Applying...'; this.disabled=true; setTimeout(() => { this.textContent='✓ Application Submitted'; this.style.background='rgba(81,207,102,0.2)'; this.style.color='#51cf66'; this.style.borderColor='rgba(81,207,102,0.5)'; }, 800);">Apply for Membership</button>
             </div>
         </div>
 

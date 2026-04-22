@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 public class EventParticipationServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
     private EventDAO eventDAO;
     private Gson gson;
 
