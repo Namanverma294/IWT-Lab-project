@@ -87,4 +87,13 @@
         <servlet-name>UserListServlet</servlet-name>
         <url-pattern>/api/users/*</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>AdminServlet</servlet-name>
+        <servlet-class>com.ems.servlet.AdminServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminServlet</servlet-name>
+        <url-pattern>/api/admins</url-pattern>
+    </servlet-mapping>
+
 </web-app>

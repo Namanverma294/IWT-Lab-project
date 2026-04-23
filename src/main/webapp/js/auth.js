@@ -36,6 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     btn.textContent = '✓ Success! Redirecting...';
                     const role = json.data?.role || 'participant';
                     localStorage.setItem('userName', json.data?.name || 'User');
+                    localStorage.setItem('userEmail', json.data?.email || '');
+                    localStorage.setItem('userPhone', json.data?.phone || '');
                     localStorage.setItem('userRole', role);
                     setTimeout(() => redirectToDashboard(role), 500);
                 }
@@ -145,6 +147,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const logoutLink = e.target.closest('a[href="api/auth/logout"]');
         if (logoutLink) {
             localStorage.removeItem('userName');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userPhone');
             localStorage.removeItem('userRole');
         }
     });

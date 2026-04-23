@@ -64,6 +64,8 @@ public class LoginServlet extends HttpServlet {
             Map<String, Object> data = new HashMap<>();
             data.put("role", "participant");
             data.put("name", customer.getName());
+            data.put("email", customer.getEmail());
+            data.put("phone", customer.getPhone());
             
             jsonResponse.put("success", true);
             jsonResponse.put("message", "Login successful");
@@ -103,6 +105,8 @@ public class LoginServlet extends HttpServlet {
                     Map<String, Object> data = new HashMap<>();
                     data.put("role", frontendRole);
                     data.put("name", name);
+                    data.put("email", email);
+                    data.put("phone", ""); // Organizers might not have a phone in the table initially
                     
                     jsonResponse.put("success", true);
                     jsonResponse.put("message", "Login successful");

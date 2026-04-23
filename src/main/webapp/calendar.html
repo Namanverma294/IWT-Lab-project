@@ -115,18 +115,23 @@
         </div>
     </main>
 
-    <script src="js/data.js"></script>
+    <script src="js/events.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", async () => {
             const year = 2026;
             const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             const calendarContainer = document.getElementById('yearlyCalendar');
             let html = '';
             
+            // Fetch events from backend
+            const events = await fetchPublishedEvents();
+            
             // Map event dates for easy lookup
             const eventMap = {};
             events.forEach(ev => {
-                eventMap[ev.date] = ev; // Format is YYYY-MM-DD
+                const d = new Date(ev.startDate);
+                const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                eventMap[dateStr] = ev; 
             });
 
             months.forEach((month, index) => {
@@ -164,11 +169,14 @@
 
         function showEvent(ev) {
             const box = document.getElementById('eventDetailBox');
-            document.getElementById('edTitle').textContent = ev.title + ' (' + ev.date + ')';
-            document.getElementById('edClub').textContent = "Hosted by: " + ev.club;
-            document.getElementById('edLocation').textContent = "📍 " + ev.location;
-            document.getElementById('edTime').textContent = "🕒 " + ev.time;
-            document.getElementById('edType').textContent = "🏷️ " + ev.category + " / " + ev.type;
+            const d = new Date(ev.startDate);
+            const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            
+            document.getElementById('edTitle').innerHTML = `<a href="event-detail.html?id=${ev.id}" style="color:var(--accent-primary); text-decoration:none;">${ev.name} 🔗</a>`;
+            document.getElementById('edClub').textContent = "Hosted by: Organizer";
+            document.getElementById('edLocation').textContent = "📍 " + (ev.venue || 'TBA');
+            document.getElementById('edTime').textContent = "📅 " + dateStr;
+            document.getElementById('edType').textContent = "🏷️ " + ev.type;
             
             box.classList.remove('active');
             void box.offsetWidth; // trigger reflow

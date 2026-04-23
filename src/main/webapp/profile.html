@@ -62,11 +62,18 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', async () => {
-        // Profile page - uses Java session
-        document.getElementById('avatarCircle').textContent = 'U';
-        document.getElementById('profileRole').textContent = 'PARTICIPANT';
-        document.getElementById('profileName').value = 'User';
-        document.getElementById('profileEmail').value = '';
+        // Pull user data from localStorage
+        const userName = localStorage.getItem('userName') || 'User';
+        const userEmail = localStorage.getItem('userEmail') || '';
+        const userPhone = localStorage.getItem('userPhone') || '';
+        const userRole = localStorage.getItem('userRole') || 'participant';
+
+        // Update UI
+        document.getElementById('avatarCircle').textContent = userName.charAt(0).toUpperCase();
+        document.getElementById('profileRole').textContent = userRole.toUpperCase();
+        document.getElementById('profileName').value = userName;
+        document.getElementById('profileEmail').value = userEmail;
+        document.getElementById('profilePhone').value = userPhone;
 
         document.getElementById('profileForm').addEventListener('submit', async (e) => {
             e.preventDefault();

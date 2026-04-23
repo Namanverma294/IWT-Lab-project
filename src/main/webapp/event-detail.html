@@ -16,8 +16,8 @@
                 <span style="background: linear-gradient(90deg, #d8b4fe, #a855f7, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; font-size: 1.6rem;">Campus Connect</span>
             </a>
             <div class="auth-buttons" style="display: flex; gap: 1rem; align-items: center;">
-                <a href="#" onclick="history.back()" class="btn-login" style="padding: 0.5rem; margin: 0;">← Back</a>
-                <a href="api/auth/logout" id="logoutBtn" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Sign Out</a>
+                <a href="#" onclick="event.preventDefault(); document.getElementById('loginModal').style.display='flex';" class="btn-login" style="padding: 0.5rem; margin: 0;">Log in</a>
+                <a href="signup.html" class="btn-primary">Sign up</a>
             </div>
         </div>
     </header>
@@ -36,12 +36,13 @@
         const eventId = params.get('id');
         if (!eventId) { document.getElementById('eventContent').innerHTML = '<h2>Event not found</h2>'; return; }
 
-        const event = await fetchEventById(eventId);
-        if (!event) { document.getElementById('eventContent').innerHTML = '<h2>Event not found</h2>'; return; }
+        const apiData = await fetchEventById(eventId);
+        if (!apiData || !apiData.event) { document.getElementById('eventContent').innerHTML = '<h2>Event not found</h2>'; return; }
+        const event = apiData.event;
 
-        const participantCount = 0;
-        const session = null;
-        const isRegistered = false;
+        const participantCount = apiData.participantCount || 0;
+        const session = localStorage.getItem('userName') ? true : false;
+        const isRegistered = apiData.isRegistered || false;
         const avgRating = 0;
         const feedbacks = [];
         const eventServices = [];
@@ -67,10 +68,10 @@
                     <div class="event-card" style="cursor: default; margin-bottom: 1.5rem;">
                         <h3 style="margin-bottom: 1rem; color: #c4b5fd;">Event Details</h3>
                         <div class="event-details" style="gap: 0.75rem;">
-                            <div class="detail-item" style="font-size: 1rem;">📅 <strong>Start:</strong>&nbsp; ${new Date(event.start_date).toLocaleDateString('en-IN', {weekday:'long', day:'numeric', month:'long', year:'numeric'})}</div>
-                            <div class="detail-item" style="font-size: 1rem;">📅 <strong>End:</strong>&nbsp; ${new Date(event.end_date).toLocaleDateString('en-IN', {weekday:'long', day:'numeric', month:'long', year:'numeric'})}</div>
+                            <div class="detail-item" style="font-size: 1rem;">📅 <strong>Start:</strong>&nbsp; ${new Date(event.startDate).toLocaleDateString('en-IN', {weekday:'long', day:'numeric', month:'long', year:'numeric'})}</div>
+                            <div class="detail-item" style="font-size: 1rem;">📅 <strong>End:</strong>&nbsp; ${new Date(event.endDate).toLocaleDateString('en-IN', {weekday:'long', day:'numeric', month:'long', year:'numeric'})}</div>
                             <div class="detail-item" style="font-size: 1rem;">📍 <strong>Venue:</strong>&nbsp; ${event.venue || 'To Be Announced'}</div>
-                            <div class="detail-item" style="font-size: 1rem;">👥 <strong>Expected Guests:</strong>&nbsp; ${event.num_guests}</div>
+                            <div class="detail-item" style="font-size: 1rem;">👥 <strong>Expected Guests:</strong>&nbsp; ${event.noOfGuests}</div>
                             <div class="detail-item" style="font-size: 1rem;">📝 <strong>Registered:</strong>&nbsp; ${participantCount} participants</div>
                         </div>
                     </div>
